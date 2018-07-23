@@ -1,9 +1,9 @@
 let walk = require('walk'),
 path = require('path'),
 
-options = {},
+dir = process.argv[2] || process.cwd();
 
-walker = walk.walk(process.argv[2] || process.cwd(), options);
+walker = walk.walk(dir);
 
 walker.on('names', function (root, names, next) {
 

@@ -1,19 +1,12 @@
-let walk = require('walk'),
-path = require('path'),
+let dir = process.argv[2] || process.cwd();
 
-options = {},
+require('walk').walk(dir)
 
-walker = walk.walk(process.argv[2] || process.cwd(), options);
+// on file
+.on('file', function (root, fileStats, next) {
 
-walker.on('names', function (root, names, next) {
-
-    //console.log(path.join(root, fileStats.name));
-
-    //console.log(fileStats.isDirectory());
-    console.log('names at : ' + root);
-    console.log(names);
-    console.log('');
-
+    // log absolute path of each file found
+    console.log(require('path').join(root,fileStats.name));
     next();
 
 });
