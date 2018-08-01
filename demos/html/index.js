@@ -1,8 +1,43 @@
 
 let walk = require('walk').walk,
-path = require('path')
-    yargs = require('yargs');
+path = require('path'),
+yargs = require('yargs'),
 
+htmlWalker = function (dir, forFile) {
+
+    // resolve to absolute path
+    dir = path.resolve(dir);
+
+    // walk the set dir
+    walk(dir)
+
+    // on file
+    .on('file', function (root, stats, next) {
+
+        let ext = path.extname(stats.name).toLowerCase();
+
+        if (ext === '.html' || ext === '.htm') {
+
+            forFile.call({
+
+                root: root,
+                absPath: path.join(root, stats.name),
+                ext: ext,
+                stats: stats
+
+            }, next);
+
+        } else {
+
+            next();
+
+        }
+
+    });
+
+};
+
+// process cli arguments with yargs
 yargs
 
 .command({
@@ -22,28 +57,43 @@ yargs
     command: 'list',
     handler: function (argv) {
 
+        htmlWalker(argv.dir, function (next) {
+
+            console.log(this.absPath);
+
+            next();
+
+        });
+
+        /*
         // resolve to absolute path
         argv.dir = path.resolve(argv.dir);
 
-        // on file
+        // walk the set dir
         walk(argv.dir)
 
         // on file
         .on('file', function (root, stats, next) {
 
-            let ext = path.extname(stats.name);
 
-            console.log(ext);
+        let ext = path.extname(stats.name);
 
-            if (ext.toLowerCase() === '.html') {
+        console.log(ext);
 
-                console.log(path.join(argv.dir, root, stats.name));
+        if (ext.toLowerCase() === '.html') {
 
-            }
+        console.log(path.join(argv.dir, root, stats.name));
 
-            next();
+        }
+
+        next();
+
+
+        htmlWalker(argv.dir)
+
 
         });
+         */
 
     }
 
