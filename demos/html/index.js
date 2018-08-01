@@ -16,6 +16,7 @@ yargs
 
 })
 
+// just list all html files
 .command({
 
     command: 'list',
@@ -30,10 +31,15 @@ yargs
         // on file
         .on('file', function (root, stats, next) {
 
-            // log absolute path of each file found
-            console.log(path.join(argv.dir,root,stats.name));
+            let ext = path.extname(stats.name);
 
-            //console.log(names)
+            console.log(ext);
+
+            if (ext.toLowerCase() === '.html') {
+
+                console.log(path.join(argv.dir, root, stats.name));
+
+            }
 
             next();
 
@@ -43,7 +49,11 @@ yargs
 
 })
 
-.option('dir', {alias: 'd',default:process.cwd()})
+.option('dir', {
+    alias: 'd',
+default:
+    process.cwd()
+})
 
 .argv;
 
