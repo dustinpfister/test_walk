@@ -2,30 +2,58 @@
 let walk = require('walk').walk,
 path = require('path'),
 yargs = require('yargs'),
+fs = require('fs'),
 
-htmlWalker = function (dir, forFile) {
+// html walker
+htmlWalker = function (opt, forFile) {
 
-    // resolve to absolute path
-    dir = path.resolve(dir);
+    opt = opt || {};
+    forFile = forFile || function () {};
+
+    // dir will be the given dir, or current working dir
+    // and it should always be an absolute path
+    opt.dir = opt.dir || process.cwd();
+    opt.dir = path.resolve(opt.dir);
+
+    // default file reading to false
+    opt.read = opt.read || false;
 
     // walk the set dir
-    walk(dir)
+    walk(opt.dir)
 
     // on file
     .on('file', function (root, stats, next) {
 
-        let ext = path.extname(stats.name).toLowerCase();
+        let ext = path.extname(stats.name).toLowerCase(),
+        api = {
+
+            root: root,
+            absPath: path.join(root, stats.name),
+            ext: ext,
+            stats: stats,
+            html: null,
+            err: null
+
+        };
 
         if (ext === '.html' || ext === '.htm') {
 
-            forFile.call({
+            if (opt.read) {
 
-                root: root,
-                absPath: path.join(root, stats.name),
-                ext: ext,
-                stats: stats
+                fs.readFile(api.absPath, 'utf-8', function (err, html) {
 
-            }, next);
+                    api.err = err;
+                    api.html = html;
+
+                    forFile.call(api, next);
+
+                });
+
+            } else {
+
+                forFile.call(api, next);
+
+            }
 
         } else {
 
@@ -57,43 +85,39 @@ yargs
     command: 'list',
     handler: function (argv) {
 
-        htmlWalker(argv.dir, function (next) {
+        htmlWalker({
+            dir: argv.dir,
+            read: false
+        }, function (next) {
 
+            // just log the absolute path of all files
             console.log(this.absPath);
 
             next();
 
         });
 
-        /*
-        // resolve to absolute path
-        argv.dir = path.resolve(argv.dir);
+    }
 
-        // walk the set dir
-        walk(argv.dir)
+})
 
-        // on file
-        .on('file', function (root, stats, next) {
+// read all html files
+.command({
 
+    command: 'read',
+    handler: function (argv) {
 
-        let ext = path.extname(stats.name);
+        htmlWalker({
+            dir: argv.dir,
+            read: true
+        }, function (next) {
 
-        console.log(ext);
+            // logg the html
+            console.log(this.html);
 
-        if (ext.toLowerCase() === '.html') {
-
-        console.log(path.join(argv.dir, root, stats.name));
-
-        }
-
-        next();
-
-
-        htmlWalker(argv.dir)
-
+            next();
 
         });
-         */
 
     }
 
