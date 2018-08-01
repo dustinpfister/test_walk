@@ -74,6 +74,8 @@ yargs
     handler: function () {
 
         console.log('html file tool demo');
+        console.log('node index list -d ./public');
+        console.log('node read list -d ./public');
 
     }
 
